@@ -121,6 +121,18 @@ app.prepare().then(async () => {
     ctx.body = data;
   });
 
+  router.get("/subscriptions", async (ctx) => {
+
+    const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
+    const client = new Shopify.Clients.Rest(session.shop, session.accessToken);
+    const data = await client.get({
+      path: 'recurring_application_charges',
+    });
+
+    ctx.status = 200;
+    ctx.body = data;
+  });
+
   router.post("/customers", koaBody(), async (ctx) => {
 
     const email = ctx.request.body.email;
@@ -167,6 +179,16 @@ app.prepare().then(async () => {
     const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
     server.context.client = await handlers.createClient(session.shop, session.accessToken);
     const res = await handlers.getSubscriptionUrl(ctx, session.shop);
+
+    ctx.status = 200;
+    ctx.body = res;
+  })
+
+  router.post("/billing-pro", async (ctx) => {
+
+    const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
+    server.context.client = await handlers.createClient(session.shop, session.accessToken);
+    const res = await handlers.getSubscriptionPro(ctx, session.shop);
 
     ctx.status = 200;
     ctx.body = res;

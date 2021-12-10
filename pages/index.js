@@ -1,27 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Page, Thumbnail, Layout } from "@shopify/polaris";
 import Datatable from '../components/Datatable';
-import useNavigate from 'react-router-dom';
 
 const Index = ({authAxios}) => {
-
-  const navigate = useNavigate();
 
   const bestsellers = [];
 
   const [customers, setCustomers] = useState([]);
   const [orderedItems, setOrderedItems] = useState([]);
+  const [subscription, setSubscription] = useState(null);
   const [emailSubject] = useState('Bestseller Alert!');
   const [emailTitle] = useState('Hi, customer! Checkout our bestselling products:');
   const [emailContent, setEmailContent] = useState(`Bestselling Products: ${bestsellers}`); 
 
   useEffect(() => {
-
-    authAxios.post('/billing')
-    .then(res => {
-      console.log(res.data);
-      navigate(`./${res.data}`)
-    });
 
     authAxios.get('/customers')
     .then(res => setCustomers(res.data.body.customers));
@@ -29,7 +21,24 @@ const Index = ({authAxios}) => {
     authAxios.get('/orders')
     .then(res => res.data.body.orders.map(order => order.line_items.map(item => setOrderedItems(orderedItems => [...orderedItems, item.name.split(" - ")[0]]))));
 
-    return () => {setCustomers([]), setOrderedItems([])};
+    authAxios.get('/subscriptions')
+    .then(res => {
+
+      const subscriptions = res.data.body.recurring_application_charges;
+      const length = res.data.body.recurring_application_charges.length;
+
+      for (let i = 0; i < length; i++) {
+
+        if (subscriptions[i].status !== "active") {
+          continue;
+        } else {
+          setSubscription(subscriptions[i].name);
+          break;
+        }
+      }
+    });
+
+    return () => {setCustomers([]), setOrderedItems([]), setSubscription(null)};
 
   }, [authAxios]);
 
@@ -42,16 +51,22 @@ const Index = ({authAxios}) => {
   }, [bestsellers]);
 
   const handleClick = () => {
-    
-    customers.map(customer => {
-      
-      const email = customer.email;
 
-      customer.email !== null && 
-      authAxios.post('/customers', {email, emailSubject, emailTitle, emailContent})
-      .then(res => res)
-      .catch(err => err);
-    });
+    subscription == null
+    ? ( authAxios.post('/billing')
+    .then(res => {
+      window.parent.location.href = res.data;
+    })) : (
+      customers.map(customer => {
+        
+        const email = customer.email;
+  
+        customer.email !== null && 
+        authAxios.post('/customers', {email, emailSubject, emailTitle, emailContent})
+        .then(res => res)
+        .catch(err => err);
+      })
+    )
   };
 
   orderedItems.length > 0 && orderedItems.forEach(item => {
@@ -77,9 +92,15 @@ const Index = ({authAxios}) => {
         onAction: handleClick,
         loading: bestsellers == null ? true : false
       }}
+      secondaryActions={{
+        content: 'Cancel Subscription',
+        destructive: true,
+        onaction: () => console.log('test'),
+        loading: bestsellers == null ? true : false
+      }}
     >
       <Layout>
-        <Datatable authAxios={authAxios} bestsellers={bestsellers} customers={customers}/>
+        <Datatable authAxios={authAxios} bestsellers={bestsellers} customers={customers} subscription={subscription}/>
       </Layout>
     </Page>
   )

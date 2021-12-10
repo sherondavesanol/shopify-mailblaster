@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Button } from '@shopify/polaris';
 import ModalComponent from './ModalComponent';
 
-function ModalButton({ authAxios, bestsellers, email, name }) {
+function ModalButton({ authAxios, bestsellers, email, name, subscription }) {
 
         const [active, setActive] = useState(false);
         const handleChange = useCallback(() => setActive(!active), [active]);
@@ -18,6 +18,7 @@ function ModalButton({ authAxios, bestsellers, email, name }) {
                                 active={active}
                                 email={email}
                                 name={name}
+                                subscription={subscription}
                         />
                 </>
         )

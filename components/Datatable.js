@@ -2,7 +2,7 @@ import { Button, Card, DataTable, Page } from '@shopify/polaris';
 import React, { useCallback, useState } from 'react';
 import ModalButton from './ModalButton';
 
-function Datatable({authAxios, bestsellers, customers}) {
+function Datatable({authAxios, bestsellers, customers, subscription}) {
 
     const [sortedRows, setSortedRows] = useState(null);
 
@@ -22,7 +22,7 @@ function Datatable({authAxios, bestsellers, customers}) {
         customer.last_name, 
         customer.orders_count, 
         `${customer.total_spent} PHP`, 
-        <ModalButton authAxios={authAxios} email={customer.email} name={customer.first_name} bestsellers={bestsellers} />  
+        <ModalButton authAxios={authAxios} email={customer.email} name={customer.first_name} bestsellers={bestsellers} subscription={subscription} />  
     ]);
 
     const rows = sortedRows ? sortedRows : initiallySortedRows;

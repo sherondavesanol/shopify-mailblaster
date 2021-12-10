@@ -5,22 +5,22 @@ export function RECURRING_CREATE(url) {
   return gql`
     mutation {
       appSubscriptionCreate(
-          name: "Standard Plan"
+          name: "Pro Plan"
           returnUrl: "${url}"
           test: true
           lineItems: [
           {
             plan: {
               appUsagePricingDetails: {
-                  cappedAmount: { amount: 10, currencyCode: USD }
-                  terms: "$1 for 1000 emails"
+                  cappedAmount: { amount: 77, currencyCode: USD }
+                  terms: "$0.7 for 1000 emails"
               }
             }
           }
           {
             plan: {
               appRecurringPricingDetails: {
-                  price: { amount: 10, currencyCode: USD }
+                  price: { amount: 77, currencyCode: USD }
               }
             }
           }
@@ -38,7 +38,7 @@ export function RECURRING_CREATE(url) {
     }`;
 }
 
-export const getSubscriptionUrl = async (ctx, shop) => {
+export const getSubscriptionPro = async (ctx, shop) => {
 
   const { client } = ctx;
 

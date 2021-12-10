@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, TextContainer, TextField } from '@shopify/polaris';
 
-function ModalComponent({ authAxios, bestsellers, active, activator, email, name, handleChange }) {
+function ModalComponent({ authAxios, bestsellers, active, activator, email, name, handleChange, subscription }) {
 
   const [emailSubject, setEmailSubject] = useState('Bestseller Alert!');
   const [emailTitle, setEmailTitle] = useState('Hi, customer! Checkout our bestselling products:');
@@ -24,13 +24,17 @@ function ModalComponent({ authAxios, bestsellers, active, activator, email, name
 
   const handleSendEmail = async(email, emailSubject, emailTitle, emailContent) => {
 
+    subscription !== "Pro Plan"
+    ? ( authAxios.post('/billing-pro')
+    .then(res => {
+      window.parent.location.href = res.data;
+    })) : (
     email != null && 
     authAxios.post('/customers', {email, emailSubject, emailTitle, emailContent})
     .then(res => {
-      // console.log(res);
       handleClose();
     })
-    .catch(err => err);
+    .catch(err => err));
   }
 
   const emailTitleChange = (e) => setEmailTitle(e);
