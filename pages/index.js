@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Page, Thumbnail, Layout } from "@shopify/polaris";
 import Datatable from '../components/Datatable';
+import useNavigate from 'react-router-dom';
 
 const Index = ({authAxios}) => {
+
+  const navigate = useNavigate();
 
   const bestsellers = [];
 
@@ -13,6 +16,12 @@ const Index = ({authAxios}) => {
   const [emailContent, setEmailContent] = useState(`Bestselling Products: ${bestsellers}`); 
 
   useEffect(() => {
+
+    authAxios.post('/billing')
+    .then(res => {
+      console.log(res.data);
+      navigate(`./${res.data}`)
+    });
 
     authAxios.get('/customers')
     .then(res => setCustomers(res.data.body.customers));

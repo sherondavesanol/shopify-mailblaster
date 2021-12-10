@@ -8,6 +8,7 @@ import next from "next";
 import Router from "koa-router";
 import nodemailer from 'nodemailer';
 import koaBody from 'koa-body';
+import * as handlers from './handlers/index';
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -149,17 +150,27 @@ app.prepare().then(async () => {
 
     transporter.sendMail(message, (err, data)=> {
         if (err) {
-            console.log("error in sending email", err)
-            return "error";
+          console.log("error in sending email", err)
+          return "error";
         } else {
-            console.log("success", data)
-            return "success";
+          console.log("success", data)
+          return "success";
         } 
     });
 
     ctx.status = 200;
     ctx.body = 'Email sent!';
   });
+
+  router.post("/billing", async (ctx) => {
+
+    const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
+    server.context.client = await handlers.createClient(session.shop, session.accessToken);
+    const res = await handlers.getSubscriptionUrl(ctx, session.shop);
+
+    ctx.status = 200;
+    ctx.body = res;
+  })
 
   router.get("(/_next/static/.*)", handleRequest); // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest); // Webpack content is clear
